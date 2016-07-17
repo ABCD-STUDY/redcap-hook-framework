@@ -31,7 +31,8 @@ $hook_debug_default = 2;
 $hook_debug_projects = array(
 	//PID => HOOK DEBUG LEVEL (0-3)
 	'17'  => 2,       //Primary Example Project
-	'21'  => 2        //Hooks parsing tester
+	'21'  => 2,       //Hooks parsing tester
+	'12'  => 1        // REDCap data entry project for ABCD
 );
 
 // Returns an array of paths to be included for the hook
