@@ -17,6 +17,51 @@
      });
   }
 
+  var languageModification = true;
+  function updateLanguage() {
+      if (languageModification == false) {
+	  return; // don't do anything
+      }
+    
+      // check the language setting first, we should have an id on this page that ends with 'select_language-tr'
+      var language = "";
+      jQuery('#questiontable').find('tr').each(function() {
+	  if (typeof this.id != 'undefined' && this.id != "") {
+	      var target = 'select_language-tr';
+	      if ( (this.id).slice(-target.length) === target ) {
+		  var cb = jQuery(this).find('td.data input:checked');
+		  if (cb.length == 1) {
+			// spanish
+		      language = "es";
+		  } else {
+		      // english
+		      language = "en";
+		  }
+	      }
+	  }
+      });
+      if (languageModification == true && language == "") {
+	  // we are called the first time, but there is no language setting on this page
+	  languageModification = false; // never go here again - this should speed up the code
+      }
+      
+      // if we find a language setting on this page we should have either es or en in language
+      // if we don't have an entry at this point - there is no reason to do anything on this page
+      // as we don't know the language
+      
+      jQuery("#questiontable").find('span').each(function() {
+	  var lang = jQuery(this).attr('lang');
+	  if (typeof lang  != 'undefined' && lang != "") {
+	      if (lang == language) {
+		  jQuery(this).show();
+	      } else {
+		  // disable this field
+		  jQuery(this).hide();
+	      }
+	  }
+      });
+  }
+
 
   // color all rows that have values assigned by the user
   function updateBackgrounds() {
@@ -33,9 +78,14 @@
 	    existingEntries = true; // at least one input in this tr is not empty
 	    break;	    
 	 } else if ( inputs[i].type == "text" && inputs[i].value !== "") {
-            //console.log("Found set in " + jQuery(this).attr('id') + " as " + inputs[i].value + " input: " + inputs[i]);
-	    existingEntries = true; // at least one input in this tr is not empty	 
-	    break;
+             //console.log("Found set in " + jQuery(this).attr('id') + " as " + inputs[i].value + " input: " + inputs[i]);
+
+	     // we could have a calculated field, in that case we don't want to mark it
+	     if (jQuery(inputs[i]).attr('readonly') == "readonly") {
+		 break;
+	     }
+	     existingEntries = true; // at least one input in this tr is not empty	 
+	     break;
          }
        }
        if (existingEntries) {
@@ -67,7 +117,8 @@
      // console.log("now in redcap data entry form");
      jQuery('tbody tr').click(function() {
         //console.log("Someone clicked on something (in redcap_data_entry_form)");
-	updateBackgrounds();
+	 updateBackgrounds();
+	 updateLanguage(); // every time we click on something
      });
      // only add a barcode if we have this id on the page barcode_id_redcap-tr
      var placeholder = jQuery('#barcode_id_redcap-tr').find('td');
@@ -77,6 +128,7 @@
 
         addBarcode( '#barcode', getUrlParameter('id'));
      }
+     updateLanguage(); // first time as well
   });
   
 </script>

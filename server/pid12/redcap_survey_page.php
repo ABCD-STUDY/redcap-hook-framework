@@ -8,6 +8,51 @@
 ?>
 
 <script type='text/javascript'>
+  var languageModification = true;
+  function updateLanguage() {
+      if (languageModification == false) {
+	  return; // don't do anything
+      }
+    
+      // check the language setting first, we should have an id on this page that ends with 'select_language-tr'
+      var language = "";
+      jQuery('#questiontable').find('tr').each(function() {
+	  if (typeof this.id != 'undefined' && this.id != "") {
+	      var target = 'select_language-tr';
+	      if ( (this.id).slice(-target.length) === target ) {
+		  var cb = jQuery(this).find('td.data input:checked');
+		  if (cb.length == 1) {
+			// spanish
+		      language = "es";
+		  } else {
+		      // english
+		      language = "en";
+		  }
+	      }
+	  }
+      });
+      if (languageModification == true && language == "") {
+	  // we are called the first time, but there is no language setting on this page
+	  languageModification = false; // never go here again - this should speed up the code
+      }
+      
+      // if we find a language setting on this page we should have either es or en in language
+      // if we don't have an entry at this point - there is no reason to do anything on this page
+      // as we don't know the language
+      
+      jQuery("#questiontable").find('span').each(function() {
+	  var lang = jQuery(this).attr('lang');
+	  if (typeof lang  != 'undefined' && lang != "") {
+	      if (lang == language) {
+		  jQuery(this).show();
+	      } else {
+		  // disable this field
+		  jQuery(this).hide();
+	      }
+	  }
+      });
+  }
+
 
   // color all rows that have values assigned by the user
   function updateBackgrounds() {
@@ -40,7 +85,8 @@
 
   $(document).ready(function() {
      jQuery('tbody tr').click(function() {
-	updateBackgrounds();
+   	    updateBackgrounds();
+        updateLanguage(); // first time as well
      });
   });
   
