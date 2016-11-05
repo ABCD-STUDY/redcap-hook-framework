@@ -8,7 +8,19 @@
 ?>
 
 <script type='text/javascript'>
+  function getXPath( element ) {
+      var xpath = '';
+      for ( ; element && element.nodeType == 1; element = element.parentNode )
+          {
+              var id = $(element.parentNode).children(element.tagName).index(element) + 1;
+              id > 1 ? (id = '[' + id + ']') : (id = '');
+              xpath = '/' + element.tagName.toLowerCase() + id + xpath;
+          }
+      return xpath;
+  }
+    
   var languageModification = true;
+  var dropDownEntries = {};
   function updateLanguage() {
       if (languageModification == false) {
 	  return; // don't do anything
@@ -51,6 +63,31 @@
 	      }
 	  }
       });
+      // we have to do something special for the drop-down menu entries, they don't contain the html
+      // code required to switch (all span's are removed), we have to look for those entries independently
+      // for this we have to keep a list of entries and the original content ready as we will remove the entries
+      // present the first time around
+      jQuery('#questiontable').find('select option').each(function() {
+          var entry = getXPath(this);
+          // do we have this entry in dropDownEntries?
+          if (jQuery.inArray(entry, Object.keys(dropDownEntries)) == -1) {
+              dropDownEntries[entry] = jQuery(this).text();
+          }
+          // ok if we have this already in the list, what do we need to display in this case?
+          // is there a language setting?
+          str = "";
+          var re = /##([a-z]+)##([^(#)\2]*)##\/[a-z]+##/g;
+          while(match = re.exec(dropDownEntries[entry])) {
+              // we have now 
+              //console.log("found language " + match[1] + " " + match[2]);
+              if (match[1] == language) {
+                  str = str + match[2];
+              }
+          }
+          if (str != "") {
+             jQuery(this).text(str);
+          }
+      });
   }
 
 
@@ -88,6 +125,8 @@
    	    updateBackgrounds();
         updateLanguage(); // first time as well
      });
+  	 updateBackgrounds();
+     updateLanguage(); // first time as well
   });
   
 </script>
